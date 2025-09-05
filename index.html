@@ -1,0 +1,2049 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Club Platform</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      /* --- Scroll-Based Navbar Behavior --- */
+      .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        transition: transform 0.3s ease;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+      }
+
+      .navbar.navbar-hidden {
+        transform: translateY(-100%);
+      }
+
+      .navbar.navbar-visible {
+        transform: translateY(0);
+      }
+
+      /* Adjust main content to account for fixed navbar */
+      .main-content {
+        margin-top: 80px; /* Adjust based on your navbar height */
+      }
+
+      /* Smooth scroll behavior */
+      html {
+        scroll-behavior: smooth;
+      }
+
+      /* Navbar progress indicator */
+      .navbar::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+
+      .navbar.navbar-visible::after {
+        width: 100%;
+      }
+
+      /* Enhanced navbar backdrop */
+      .navbar {
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .navbar.navbar-hidden {
+        box-shadow: none;
+      }
+
+      /* Mobile navbar adjustments */
+      @media (max-width: 768px) {
+        .navbar {
+          background: rgba(255, 255, 255, 0.98);
+        }
+
+        .main-content {
+          margin-top: 70px; /* Slightly less margin on mobile */
+        }
+
+        /* Ensure mobile menu works with fixed navbar */
+        .nav-menu {
+          background: rgba(255, 255, 255, 0.98);
+          backdrop-filter: blur(10px);
+        }
+      }
+
+      /* Ensure navbar doesn't interfere with modals */
+      .modal {
+        z-index: 1001;
+      }
+
+      /* Smooth transitions for all navbar states */
+      .navbar * {
+        transition: all 0.3s ease;
+      }
+
+      /* Scroll to top button */
+      .scroll-to-top-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+        transition: all 0.3s ease;
+        z-index: 999;
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      .scroll-to-top-btn.visible {
+        display: flex;
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .scroll-to-top-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+      }
+
+      .scroll-to-top-btn:active {
+        transform: translateY(-1px);
+      }
+
+      /* Mobile scroll to top button */
+      @media (max-width: 768px) {
+        .scroll-to-top-btn {
+          bottom: 20px;
+          right: 20px;
+          width: 45px;
+          height: 45px;
+          font-size: 1rem;
+        }
+      }
+
+      /* --- Enhanced Admin Section Styling --- */
+      #admin.section {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-radius: 24px;
+        box-shadow: 0 8px 32px 0 rgba(30, 60, 90, 0.12);
+        margin-top: 2rem;
+        padding-bottom: 2rem;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        backdrop-filter: blur(20px);
+      }
+
+      #admin .section-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        border-radius: 24px 24px 0 0;
+        padding: 3rem 2.5rem 2rem 2.5rem;
+        box-shadow: 0 4px 20px 0 rgba(102, 126, 234, 0.3);
+        margin-bottom: 0;
+        position: relative;
+        overflow: hidden;
+      }
+
+      #admin .section-header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="admin-pattern" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23admin-pattern)"/></svg>');
+        opacity: 0.6;
+      }
+
+      #admin .section-header h2 {
+        font-size: 2.5rem;
+        font-weight: 550;
+        letter-spacing: -0.02em;
+        margin: 0;
+        position: relative;
+        z-index: 2;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .admin-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin: 2.5rem 2rem 2rem 2rem;
+        padding: 0 1rem;
+      }
+
+      .admin-stats .stat-card {
+        background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+        border-radius: 20px;
+        box-shadow: 0 4px 20px 0 rgba(30, 60, 90, 0.08);
+        padding: 2rem 1.5rem;
+        text-align: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        overflow: hidden;
+      }
+
+      .admin-stats .stat-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .admin-stats .stat-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 12px 40px 0 rgba(102, 126, 234, 0.15);
+        border-color: rgba(102, 126, 234, 0.2);
+      }
+
+      .admin-stats .stat-card:hover::before {
+        opacity: 1;
+      }
+
+      .admin-stats .stat-card i {
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+        filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.2));
+      }
+
+      .admin-stats .stat-card span {
+        display: block;
+        font-size: 2.4rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+      }
+
+      .admin-stats .stat-card p {
+        color: #64748b;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .admin-tabs {
+        display: flex;
+        gap: 0.8rem;
+        justify-content: center;
+        margin: 0 2rem 2.5rem 2rem;
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        border-radius: 20px;
+        padding: 1rem;
+        box-shadow: 0 4px 20px 0 rgba(30, 60, 90, 0.08);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+      }
+
+      .admin-tabs .tab-btn {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        outline: none;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #64748b;
+        padding: 1rem 2rem;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+      }
+
+      .admin-tabs .tab-btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(102, 126, 234, 0.1),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .admin-tabs .tab-btn:hover::before {
+        left: 100%;
+      }
+
+      .admin-tabs .tab-btn.active,
+      .admin-tabs .tab-btn:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px 0 rgba(102, 126, 234, 0.3);
+        border-color: transparent;
+      }
+
+      .admin-tab-content {
+        display: none;
+        padding: 2.5rem 3rem 2rem 3rem;
+        background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+        border-radius: 0 0 24px 24px;
+        box-shadow: 0 4px 20px 0 rgba(30, 60, 90, 0.08);
+        margin: 0 2rem;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-top: none;
+        position: relative;
+      }
+
+      .admin-tab-content::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 2rem;
+        right: 2rem;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(148, 163, 184, 0.2),
+          transparent
+        );
+      }
+
+      .admin-tab-content.active {
+        display: block;
+        animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .admin-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        justify-content: stretch;
+      }
+
+      .overview-card {
+        background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+        border-radius: 20px;
+        box-shadow: 0 4px 20px 0 rgba(30, 60, 90, 0.08);
+        padding: 2rem;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .overview-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .overview-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px 0 rgba(102, 126, 234, 0.12);
+        border-color: rgba(102, 126, 234, 0.2);
+      }
+
+      .overview-card:hover::before {
+        opacity: 1;
+      }
+
+      .overview-card h3 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .overview-card h3::before {
+        content: "";
+        width: 4px;
+        height: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 2px;
+      }
+
+      .activity-list {
+        min-height: 80px;
+        color: #475569;
+        font-size: 1rem;
+        line-height: 1.6;
+        padding: 1rem;
+        background: rgba(248, 250, 252, 0.8);
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+      }
+
+      .quick-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .quick-actions .btn {
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        box-shadow: 0 2px 8px 0 rgba(30, 60, 90, 0.08);
+        border: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .quick-actions .btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .quick-actions .btn:hover::before {
+        left: 100%;
+      }
+
+      .quick-actions .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+      }
+
+      .quick-actions .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px 0 rgba(102, 126, 234, 0.3);
+      }
+
+      .quick-actions .btn-secondary {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        color: #64748b;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+      }
+
+      .quick-actions .btn-secondary:hover {
+        background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+        color: #475569;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px 0 rgba(148, 163, 184, 0.2);
+      }
+
+      /* Approvals Tab */
+      .approval-section {
+        background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px 0 rgba(30, 60, 90, 0.08);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .approval-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px 0 rgba(30, 60, 90, 0.12);
+      }
+
+      .approval-section h3 {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .approval-section h3::before {
+        content: "🔍";
+        font-size: 1.2rem;
+      }
+
+      .pending-clubs {
+        min-height: 80px;
+        font-size: 1rem;
+        color: #475569;
+        padding: 1.5rem;
+        background: rgba(248, 250, 252, 0.8);
+        border-radius: 16px;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        line-height: 1.6;
+      }
+
+      /* User/Club Management Tabs */
+      .admin-section {
+        background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px 0 rgba(30, 60, 90, 0.08);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .admin-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px 0 rgba(30, 60, 90, 0.12);
+      }
+
+      .admin-section h3 {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .admin-section h3::before {
+        content: "👥";
+        font-size: 1.2rem;
+      }
+
+      .user-filters,
+      .club-filters {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .user-filters input,
+      .club-filters input,
+      .user-filters select,
+      .club-filters select {
+        padding: 0.8rem 1.2rem;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.9);
+        color: #1e293b;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        min-width: 200px;
+      }
+
+      .user-filters input:focus,
+      .club-filters input:focus,
+      .user-filters select:focus,
+      .club-filters select:focus {
+        border: 2px solid #667eea;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: #fff;
+      }
+
+      .user-filters input:hover,
+      .club-filters input:hover,
+      .user-filters select:hover,
+      .club-filters select:hover {
+        border-color: rgba(102, 126, 234, 0.4);
+      }
+
+      .admin-list {
+        min-height: 100px;
+        font-size: 1rem;
+        color: #475569;
+        padding: 1.5rem;
+        background: rgba(248, 250, 252, 0.8);
+        border-radius: 16px;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        line-height: 1.6;
+      }
+
+      /* Content Moderation Tab */
+      .moderation-section {
+        background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px 0 rgba(30, 60, 90, 0.08);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .moderation-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px 0 rgba(30, 60, 90, 0.12);
+      }
+
+      .moderation-section h3 {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .moderation-section h3::before {
+        content: "🛡️";
+        font-size: 1.2rem;
+      }
+
+      .moderation-tabs {
+        display: flex;
+        gap: 0.8rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      .mod-tab-btn {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        color: #64748b;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 12px;
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .mod-tab-btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(102, 126, 234, 0.1),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .mod-tab-btn:hover::before {
+        left: 100%;
+      }
+
+      .mod-tab-btn.active,
+      .mod-tab-btn:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px 0 rgba(102, 126, 234, 0.25);
+        border-color: transparent;
+      }
+
+      .moderation-content {
+        background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px 0 rgba(30, 60, 90, 0.08);
+        padding: 1.5rem;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+      }
+
+      .mod-tab-content {
+        display: none;
+      }
+
+      .mod-tab-content.active {
+        display: block;
+        animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .content-list {
+        min-height: 80px;
+        font-size: 1rem;
+        color: #475569;
+        padding: 1.5rem;
+        background: rgba(248, 250, 252, 0.8);
+        border-radius: 16px;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        line-height: 1.6;
+      }
+
+      /* Enhanced Responsive Design */
+      @media (max-width: 1200px) {
+        .admin-stats {
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 1.2rem;
+          margin: 2rem 1.5rem 1.5rem 1.5rem;
+        }
+
+        .admin-overview {
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 1.5rem;
+        }
+      }
+
+      @media (max-width: 900px) {
+        #admin .section-header {
+          padding: 2.5rem 2rem 1.5rem 2rem;
+        }
+
+        #admin .section-header h2 {
+          font-size: 2.4rem;
+        }
+
+        .admin-stats {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1rem;
+          margin: 2rem 1rem 1.5rem 1rem;
+        }
+
+        .admin-stats .stat-card {
+          padding: 1.5rem 1rem;
+        }
+
+        .admin-stats .stat-card span {
+          font-size: 2rem;
+        }
+
+        .admin-stats .stat-card i {
+          font-size: 2rem;
+        }
+
+        .admin-overview {
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+        }
+
+        .admin-tabs {
+          margin: 0 1rem 2rem 1rem;
+          padding: 0.8rem;
+        }
+
+        .admin-tab-content {
+          padding: 2rem 1.5rem 1.5rem 1.5rem;
+          margin: 0 1rem;
+        }
+
+        .user-filters,
+        .club-filters {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .user-filters input,
+        .club-filters input,
+        .user-filters select,
+        .club-filters select {
+          min-width: auto;
+          width: 100%;
+        }
+      }
+
+      @media (max-width: 600px) {
+        #admin .section-header {
+          padding: 2rem 1.5rem 1rem 1.5rem;
+          border-radius: 20px 20px 0 0;
+        }
+
+        #admin .section-header h2 {
+          font-size: 2rem;
+        }
+
+        .admin-stats {
+          grid-template-columns: 1fr;
+          gap: 1rem;
+          margin: 1.5rem 0.5rem 1rem 0.5rem;
+        }
+
+        .admin-stats .stat-card {
+          padding: 1.5rem 1rem;
+        }
+
+        .admin-tabs {
+          flex-direction: column;
+          gap: 0.5rem;
+          padding: 0.8rem;
+          margin: 0 0.5rem 2rem 0.5rem;
+        }
+
+        .admin-tabs .tab-btn {
+          padding: 0.8rem 1.5rem;
+          font-size: 1rem;
+        }
+
+        .admin-tab-content {
+          padding: 1.5rem 1rem 1rem 1rem;
+          margin: 0 0.5rem;
+          border-radius: 0 0 20px 20px;
+        }
+
+        .overview-card,
+        .approval-section,
+        .admin-section,
+        .moderation-section {
+          padding: 1.5rem;
+        }
+
+        .moderation-tabs {
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .mod-tab-btn {
+          padding: 0.8rem 1.2rem;
+          text-align: center;
+        }
+      }
+
+      @media (max-width: 480px) {
+        #admin.section {
+          margin-top: 1rem;
+          border-radius: 20px;
+        }
+
+        #admin .section-header {
+          padding: 1.5rem 1rem 1rem 1rem;
+          border-radius: 20px 20px 0 0;
+        }
+
+        #admin .section-header h2 {
+          font-size: 1.8rem;
+        }
+
+        .admin-redirect-container {
+          padding: 2rem 1rem;
+        }
+
+        .admin-redirect-card {
+          padding: 2rem 1.5rem;
+        }
+
+        .admin-redirect-card h3 {
+          font-size: 1.6rem;
+        }
+
+        .admin-redirect-icon {
+          font-size: 3rem;
+        }
+
+        .admin-features li {
+          font-size: 1rem;
+          padding: 0.4rem 0.8rem;
+        }
+
+        .admin-redirect-btn {
+          font-size: 1.1rem;
+          padding: 0.8rem 1.5rem;
+        }
+      }
+
+      /* Clean & Modern Admin Panel Styling */
+      .admin-panel-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+      }
+
+      .admin-hero {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 24px;
+        padding: 4rem 3rem;
+        text-align: center;
+        margin-bottom: 3rem;
+        border: 1px solid rgba(148, 163, 184, 0.08);
+        box-shadow: 0 4px 24px rgba(102, 126, 234, 0.06);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .admin-hero::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="admin-pattern" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(102,126,234,0.02)"/></pattern></defs><rect width="100" height="100" fill="url(%23admin-pattern)"/></svg>');
+        opacity: 0.6;
+      }
+
+      .admin-hero-content {
+        position: relative;
+        z-index: 2;
+      }
+
+      .admin-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2rem auto;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.25);
+      }
+
+      .admin-icon-wrapper i {
+        font-size: 2.5rem;
+        color: #fff;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+      }
+
+      .admin-hero h1 {
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1rem;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      .admin-subtitle {
+        font-size: 1.2rem;
+        color: #64748b;
+        margin-bottom: 2.5rem;
+        font-weight: 400;
+        line-height: 1.6;
+        letter-spacing: -0.01em;
+      }
+
+      .admin-status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        border: 1px solid rgba(148, 163, 184, 0.15);
+        margin-bottom: 2.5rem;
+        backdrop-filter: blur(10px);
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.7;
+          transform: scale(1.1);
+        }
+      }
+
+      .status-text {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.95rem;
+        letter-spacing: -0.01em;
+      }
+
+      .admin-actions {
+        position: relative;
+        z-index: 2;
+      }
+
+      .admin-access-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        border: none;
+        padding: 1.25rem 2.5rem;
+        border-radius: 16px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        letter-spacing: -0.01em;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .admin-access-btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .admin-access-btn:hover::before {
+        left: 100%;
+      }
+
+      .admin-access-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
+      }
+
+      .admin-access-btn:active {
+        transform: translateY(-1px);
+      }
+
+      .admin-access-btn i {
+        font-size: 1rem;
+      }
+
+      .admin-note {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin: 0;
+        font-weight: 400;
+        letter-spacing: -0.01em;
+      }
+
+      .admin-features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+      }
+
+      .admin-feature-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        border: 1px solid rgba(148, 163, 184, 0.08);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 2px 16px rgba(102, 126, 234, 0.04);
+      }
+
+      .admin-feature-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .admin-feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 16px 40px rgba(102, 126, 234, 0.12);
+        border-color: rgba(102, 126, 234, 0.15);
+      }
+
+      .admin-feature-card:hover::before {
+        opacity: 1;
+      }
+
+      .feature-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem auto;
+        transition: all 0.3s ease;
+      }
+
+      .admin-feature-card:hover .feature-icon {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        transform: scale(1.1);
+      }
+
+      .feature-icon i {
+        font-size: 1.5rem;
+        color: #64748b;
+        transition: color 0.3s ease;
+      }
+
+      .admin-feature-card:hover .feature-icon i {
+        color: #fff;
+      }
+
+      .admin-feature-card h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1rem;
+        letter-spacing: -0.01em;
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      .admin-feature-card p {
+        color: #64748b;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin: 0;
+        font-weight: 400;
+        letter-spacing: -0.01em;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .admin-panel-container {
+          padding: 2rem 1rem;
+        }
+
+        .admin-hero {
+          padding: 3rem 2rem;
+          margin-bottom: 2rem;
+        }
+
+        .admin-hero h1 {
+          font-size: 2.2rem;
+        }
+
+        .admin-subtitle {
+          font-size: 1.1rem;
+        }
+
+        .admin-features-grid {
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+        }
+
+        .admin-access-btn {
+          padding: 1rem 2rem;
+          font-size: 1rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .admin-hero {
+          padding: 2rem 1.5rem;
+          border-radius: 20px;
+        }
+
+        .admin-hero h1 {
+          font-size: 1.8rem;
+        }
+
+        .admin-subtitle {
+          font-size: 1rem;
+        }
+
+        .admin-icon-wrapper {
+          width: 70px;
+          height: 70px;
+        }
+
+        .admin-icon-wrapper i {
+          font-size: 2rem;
+        }
+
+        .admin-feature-card {
+          padding: 1.5rem;
+        }
+
+        .admin-access-btn {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+
+      /* User Greeting Styling */
+      .user-greeting {
+        display: flex;
+        align-items: center;
+        margin-right: 1rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(
+          135deg,
+          rgba(102, 126, 234, 0.1) 0%,
+          rgba(118, 75, 162, 0.1) 100%
+        );
+        border-radius: 20px;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        transition: all 0.3s ease;
+      }
+
+      .user-greeting:hover {
+        background: linear-gradient(
+          135deg,
+          rgba(102, 126, 234, 0.15) 0%,
+          rgba(118, 75, 162, 0.15) 100%
+        );
+        border-color: rgba(102, 126, 234, 0.3);
+        transform: translateY(-1px);
+      }
+
+      .greeting-text {
+        color: #5a4ff3;
+        font-weight: 600;
+        font-size: 0.95rem;
+        white-space: nowrap;
+      }
+
+      .username {
+        color: #764ba2;
+        font-weight: 700;
+        text-decoration: underline;
+        text-decoration-color: rgba(118, 75, 162, 0.3);
+        text-underline-offset: 2px;
+      }
+
+      /* Responsive adjustments for user greeting */
+      @media (max-width: 768px) {
+        .user-greeting {
+          margin-right: 0.5rem;
+          padding: 0.4rem 0.8rem;
+        }
+
+        .greeting-text {
+          font-size: 0.9rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .nav-auth {
+          flex-direction: column;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .user-greeting {
+          margin-right: 0;
+          margin-bottom: 0.5rem;
+          order: -1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-logo">
+          <i class="fas fa-book-open"></i>
+          <span>Book Club Hub</span>
+        </div>
+        <div class="nav-menu" id="navMenu">
+          <a href="index.html" class="nav-link" data-section="home">Home</a>
+          <a href="#" class="nav-link" data-section="clubs">Book Clubs</a>
+          <a href="#" class="nav-link" data-section="discussions"
+            >Discussions</a
+          >
+          <a href="#" class="nav-link" data-section="meetings">Meetings</a>
+          <a href="#" class="nav-link" data-section="progress">Progress</a>
+          <a
+            href="#"
+            class="nav-link"
+            data-section="admin"
+            id="adminLink"
+            style="display: none"
+            >Admin</a
+          >
+        </div>
+
+        <!-- Mobile Hamburger Menu Button -->
+        <button class="hamburger-menu" id="hamburgerMenu" type="button">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+        <div class="nav-auth">
+          <div class="user-greeting" id="userGreeting" style="display: none">
+            <span class="greeting-text"
+              >Hi, <span class="username" id="usernameDisplay"></span>!</span
+            >
+          </div>
+
+          <!-- Profile Button (shown when logged in) -->
+          <div
+            class="profile-container"
+            id="profileContainer"
+            style="display: none"
+          >
+            <button class="profile-btn" id="profileBtn" type="button">
+              <div class="profile-picture" id="profilePicture">
+                <i class="fas fa-user" id="profileIcon"></i>
+                <img
+                  id="profileImage"
+                  src=""
+                  alt="Profile"
+                  style="display: none"
+                />
+              </div>
+            </button>
+
+            <!-- Profile Dropdown -->
+            <div class="profile-dropdown" id="profileDropdown">
+              <div class="profile-header">
+                <div class="profile-info">
+                  <div class="profile-picture-large" id="profilePictureLarge">
+                    <i class="fas fa-user" id="profileIconLarge"></i>
+                    <img
+                      id="profileImageLarge"
+                      src=""
+                      alt="Profile"
+                      style="display: none"
+                    />
+                  </div>
+                  <div class="profile-details">
+                    <h4 id="profileName">User Name</h4>
+                    <p id="profileEmail">user@example.com</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="profile-actions">
+                <button class="profile-action-btn" id="changePhotoBtn">
+                  <i class="fas fa-camera"></i>
+                  Change Photo
+                </button>
+                <button class="profile-action-btn" id="deletePhotoBtn">
+                  <i class="fas fa-trash"></i>
+                  Delete Photo
+                </button>
+              </div>
+
+              <div class="profile-footer">
+                <button
+                  class="profile-action-btn logout-btn"
+                  id="profileLogoutBtn"
+                >
+                  <i class="fas fa-sign-out-alt"></i>
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Auth Buttons (shown when not logged in) -->
+          <div class="auth-buttons" id="authButtons">
+            <button class="auth-btn" id="loginBtn">Login</button>
+            <button class="auth-btn" id="registerBtn">Register</button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Home Section -->
+      <section id="home" class="section active">
+        <!-- Hero Section -->
+        <div class="hero">
+          <div class="hero-content">
+            <h1>Welcome to Book Club Hub</h1>
+            <p class="hero-subtitle">
+              Connect with fellow book lovers, join exciting clubs, and track
+              your reading journey!
+            </p>
+            <div class="hero-actions">
+              <button
+                class="btn btn-primary hero-btn"
+                onclick="showSection('clubs')"
+              >
+                <i class="fas fa-search"></i>
+                Explore Clubs
+              </button>
+              <button
+                class="btn btn-secondary hero-btn"
+                onclick="showSection('discussions')"
+              >
+                <i class="fas fa-comments"></i>
+                Join Discussions
+              </button>
+            </div>
+          </div>
+
+          <div class="hero-visual">
+            <div class="floating-books">
+              <div class="book book-1">📚</div>
+              <div class="book book-2">📖</div>
+              <div class="book book-3">📕</div>
+              <div class="book book-4">📗</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Stats Section -->
+        <div class="hero-stats">
+          <div class="stat-card">
+            <i class="fas fa-users"></i>
+            <span id="totalUsers">0</span>
+            <p>Members</p>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-book"></i>
+            <span id="totalClubs">0</span>
+            <p>Book Clubs</p>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-comments"></i>
+            <span id="totalPosts">0</span>
+            <p>Discussions</p>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-calendar"></i>
+            <span id="totalMeetings">0</span>
+            <p>Meetings</p>
+          </div>
+        </div>
+
+        <!-- Featured Content Section -->
+        <div class="featured-section">
+          <h2>Featured Content</h2>
+          <div class="featured-grid">
+            <div class="featured-card featured-clubs">
+              <div class="featured-header">
+                <i class="fas fa-star"></i>
+                <h3>Popular Clubs</h3>
+              </div>
+              <div class="featured-content" id="popularClubs">
+                <!-- Popular clubs will be loaded here -->
+              </div>
+              <button class="btn btn-primary" onclick="showSection('clubs')">
+                View All Clubs
+              </button>
+            </div>
+
+            <div class="featured-card featured-discussions">
+              <div class="featured-header">
+                <i class="fas fa-fire"></i>
+                <h3>Trending Discussions</h3>
+              </div>
+              <div class="featured-content" id="trendingDiscussions">
+                <!-- Trending discussions will be loaded here -->
+              </div>
+              <button
+                class="btn btn-primary"
+                onclick="showSection('discussions')"
+              >
+                Join Discussions
+              </button>
+            </div>
+
+            <div
+              class="featured-card featured-meetings featured-meetings-horizontal"
+            >
+              <div class="featured-header">
+                <i class="fas fa-calendar-alt"></i>
+                <h3>Upcoming Meetings</h3>
+              </div>
+              <div class="featured-content" id="upcomingMeetings">
+                <!-- Upcoming meetings will be loaded here -->
+              </div>
+              <button class="btn btn-primary" onclick="showSection('meetings')">
+                View All Meetings
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reading Progress Section -->
+        <div
+          class="progress-section"
+          id="homeProgressSection"
+          style="display: none"
+        >
+          <h2>Your Reading Progress</h2>
+          <div class="progress-overview" id="homeProgressOverview">
+            <!-- Reading progress will be loaded here -->
+          </div>
+        </div>
+
+        <!-- Quick Actions Section -->
+        <div class="quick-actions-section">
+          <h2>Quick Actions</h2>
+          <div class="quick-actions-grid">
+            <div class="quick-action-card" onclick="showSection('clubs')">
+              <i class="fas fa-plus-circle"></i>
+              <h3>Create Club</h3>
+              <p>Start your own book club</p>
+            </div>
+            <div class="quick-action-card" onclick="showSection('discussions')">
+              <i class="fas fa-comment-dots"></i>
+              <h3>Start Discussion</h3>
+              <p>Share your thoughts</p>
+            </div>
+            <div class="quick-action-card" onclick="showSection('meetings')">
+              <i class="fas fa-calendar-plus"></i>
+              <h3>Schedule Meeting</h3>
+              <p>Plan your next meetup</p>
+            </div>
+            <div class="quick-action-card" onclick="showSection('progress')">
+              <i class="fas fa-chart-line"></i>
+              <h3>Track Progress</h3>
+              <p>Monitor your reading</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Community Highlights Section -->
+        <div class="community-section">
+          <h2>Community Highlights</h2>
+          <div class="community-grid">
+            <div class="community-card">
+              <div class="community-icon">
+                <i class="fas fa-trophy"></i>
+              </div>
+              <h3>Top Readers</h3>
+              <p>Discover who's reading the most this month</p>
+              <div class="top-readers" id="topReaders">
+                <!-- Top readers will be loaded here -->
+              </div>
+            </div>
+
+            <div class="community-card">
+              <div class="community-icon">
+                <i class="fas fa-lightbulb"></i>
+              </div>
+              <h3>Reading Tips</h3>
+              <p>Get inspired with reading strategies</p>
+              <div class="reading-tips">
+                <div class="tip">
+                  <i class="fas fa-clock"></i>
+                  <span>Set aside 30 minutes daily for reading</span>
+                </div>
+                <div class="tip">
+                  <i class="fas fa-bookmark"></i>
+                  <span>Use bookmarks to track your progress</span>
+                </div>
+                <div class="tip">
+                  <i class="fas fa-users"></i>
+                  <span>Join discussions to stay motivated</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Newsletter Section -->
+        <div class="newsletter-section">
+          <div class="newsletter-content">
+            <h2>Stay Updated</h2>
+            <p>
+              Get the latest updates about new clubs, events, and reading
+              challenges
+            </p>
+            <div class="newsletter-form">
+              <input
+                type="email"
+                id="newsletterEmail"
+                placeholder="Enter your email"
+              />
+              <button class="btn btn-primary" onclick="subscribeNewsletter()">
+                Subscribe
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Login Modal -->
+      <div id="loginModal" class="modal">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <h2>Login</h2>
+          <form id="loginForm">
+            <div class="form-group">
+              <label for="loginEmail">Email</label>
+              <input type="email" id="loginEmail" required />
+            </div>
+            <div class="form-group">
+              <label for="loginPassword">Password</label>
+              <div class="password-input">
+                <input type="password" id="loginPassword" required />
+                <button
+                  type="button"
+                  class="password-toggle"
+                  onclick="togglePassword('loginPassword')"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+          </form>
+          <br />
+          <p>
+            Don't have an account?
+            <a href="#" id="showRegister">Register here</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Register Modal -->
+      <div id="registerModal" class="modal">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <h2>Register</h2>
+          <form id="registerForm">
+            <div class="form-group">
+              <label for="registerName">Full Name</label>
+              <input type="text" id="registerName" required />
+            </div>
+            <div class="form-group">
+              <label for="registerEmail">Email</label>
+              <input type="email" id="registerEmail" required />
+            </div>
+            <div class="form-group">
+              <label for="registerPassword">Password</label>
+              <div class="password-input">
+                <input type="password" id="registerPassword" required />
+                <button
+                  type="button"
+                  class="password-toggle"
+                  onclick="togglePassword('registerPassword')"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="registerConfirmPassword">Confirm Password</label>
+              <div class="password-input">
+                <input type="password" id="registerConfirmPassword" required />
+                <button
+                  type="button"
+                  class="password-toggle"
+                  onclick="togglePassword('registerConfirmPassword')"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Register</button>
+          </form>
+          <br />
+          <p>
+            Already have an account? <a href="#" id="showLogin">Login here</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Book Clubs Section -->
+      <section id="clubs" class="section">
+        <div class="section-header">
+          <h2>Book Clubs</h2>
+          <button class="btn btn-primary" id="createClubBtn">
+            <i class="fas fa-plus"></i> Create Club
+          </button>
+        </div>
+
+        <div class="clubs-grid" id="clubsGrid">
+          <!-- Clubs will be dynamically loaded here -->
+        </div>
+
+        <!-- Create Club Modal -->
+        <div id="createClubModal" class="modal">
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Create New Book Club</h2>
+            <form id="createClubForm">
+              <div class="form-group">
+                <label for="clubName">Club Name</label>
+                <input type="text" id="clubName" required />
+              </div>
+              <div class="form-group">
+                <label for="clubDescription">Description</label>
+                <textarea id="clubDescription" rows="4" required></textarea>
+              </div>
+              <div class="form-group">
+                <label for="clubGenre">Genre</label>
+                <select id="clubGenre" required>
+                  <option value="" disabled selected>Select Genre</option>
+                  <option value="Fiction">Fiction</option>
+                  <option value="Non-Fiction">Non-Fiction</option>
+                  <option value="Mystery">Mystery</option>
+                  <option value="Romance">Romance</option>
+                  <option value="Science Fiction">Science Fiction</option>
+                  <option value="Fantasy">Fantasy</option>
+                  <option value="Biography">Biography</option>
+                  <option value="History">History</option>
+                  <option value="Self-Help">Self-Help</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="clubMaxMembers">Maximum Members (Optional)</label>
+                <input type="number" id="clubMaxMembers" min="1" />
+              </div>
+              <button type="submit" class="btn btn-primary">Create Club</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Discussions Section -->
+      <section id="discussions" class="section">
+        <div class="section-header">
+          <h2>Discussions</h2>
+          <select id="discussionClubSelect">
+            <option value="">Select a Book Club</option>
+          </select>
+        </div>
+
+        <div class="discussions-container">
+          <div class="discussions-list" id="discussionsList">
+            <!-- Discussions will be loaded here -->
+          </div>
+
+          <div
+            class="new-discussion"
+            id="newDiscussionForm"
+            style="display: none"
+          >
+            <h3>New Discussion</h3>
+            <form id="discussionForm">
+              <div class="form-group">
+                <label for="discussionTitle">Title</label>
+                <input type="text" id="discussionTitle" required />
+              </div>
+              <div class="form-group">
+                <label for="discussionContent">Content</label>
+                <textarea id="discussionContent" rows="4" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                Post Discussion
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Meetings Section -->
+      <section id="meetings" class="section">
+        <div class="section-header">
+          <h2>Meetings</h2>
+          <select id="meetingClubSelect">
+            <option value="">Select a Book Club</option>
+          </select>
+        </div>
+
+        <div class="meetings-container">
+          <div class="meetings-list" id="meetingsList">
+            <!-- Meetings will be loaded here -->
+          </div>
+
+          <div class="new-meeting" id="newMeetingForm" style="display: none">
+            <h3>Schedule New Meeting</h3>
+            <form id="meetingForm">
+              <div class="form-group">
+                <label for="meetingTitle">Meeting Title</label>
+                <input type="text" id="meetingTitle" required />
+              </div>
+              <div class="form-group">
+                <label for="meetingDate">Date & Time</label>
+                <input type="datetime-local" id="meetingDate" required />
+                <small class="form-help"
+                  >Please select a future date and time for your meeting.</small
+                >
+              </div>
+              <div class="form-group">
+                <label for="meetingPlatform">Platform</label>
+                <select id="meetingPlatform" required>
+                  <option value="">Select Platform</option>
+                  <option value="Zoom">Zoom</option>
+                  <option value="Google Meet">Google Meet</option>
+                  <option value="Microsoft Teams">Microsoft Teams</option>
+                  <option value="Discord">Discord</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="meetingLink">Meeting Link</label>
+                <input type="url" id="meetingLink" placeholder="https://..." />
+              </div>
+              <div class="form-group">
+                <label for="meetingDescription">Description</label>
+                <textarea id="meetingDescription" rows="3"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                Schedule Meeting
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Progress Section -->
+      <section id="progress" class="section">
+        <div class="section-header">
+          <h2>Reading Progress</h2>
+          <select id="progressClubSelect">
+            <option value="">Select a Book Club</option>
+          </select>
+        </div>
+
+        <div class="progress-container">
+          <div class="progress-list" id="progressList">
+            <!-- Progress entries will be loaded here -->
+          </div>
+
+          <div class="new-progress" id="newProgressForm" style="display: none">
+            <h3>Log Reading Progress</h3>
+            <form id="progressForm">
+              <div class="form-group">
+                <label for="bookTitle">Book Title</label>
+                <input type="text" id="bookTitle" required />
+              </div>
+              <div class="form-group">
+                <label for="bookAuthor">Author</label>
+                <input type="text" id="bookAuthor" required />
+              </div>
+              <div class="form-group">
+                <label for="totalPages">Total Pages</label>
+                <input type="number" id="totalPages" min="1" required />
+              </div>
+              <div class="form-group">
+                <label for="pagesRead">Pages Read</label>
+                <input type="number" id="pagesRead" min="0" required />
+              </div>
+              <div class="form-group">
+                <label for="readingNotes">Notes</label>
+                <textarea id="readingNotes" rows="3"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                Log Progress
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Edit Discussion Modal -->
+      <div id="editDiscussionModal" class="modal">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <h2>Edit Discussion</h2>
+          <form id="editDiscussionForm">
+            <input type="hidden" id="editDiscussionId" />
+            <div class="form-group">
+              <label for="editDiscussionTitle">Title</label>
+              <input type="text" id="editDiscussionTitle" required />
+            </div>
+            <div class="form-group">
+              <label for="editDiscussionContent">Content</label>
+              <textarea id="editDiscussionContent" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              Update Discussion
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Edit Meeting Modal -->
+      <div id="editMeetingModal" class="modal">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <h2>Edit Meeting</h2>
+          <form id="editMeetingForm">
+            <input type="hidden" id="editMeetingId" />
+            <div class="form-group">
+              <label for="editMeetingTitle">Meeting Title</label>
+              <input type="text" id="editMeetingTitle" required />
+            </div>
+            <div class="form-group">
+              <label for="editMeetingDate">Date & Time</label>
+              <input type="datetime-local" id="editMeetingDate" required />
+              <small class="form-help"
+                >Please select a future date and time for your meeting.</small
+              >
+            </div>
+            <div class="form-group">
+              <label for="editMeetingPlatform">Platform</label>
+              <select id="editMeetingPlatform" required>
+                <option value="">Select Platform</option>
+                <option value="Zoom">Zoom</option>
+                <option value="Google Meet">Google Meet</option>
+                <option value="Microsoft Teams">Microsoft Teams</option>
+                <option value="Discord">Discord</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="editMeetingLink">Meeting Link</label>
+              <input
+                type="url"
+                id="editMeetingLink"
+                placeholder="https://..."
+              />
+            </div>
+            <div class="form-group">
+              <label for="editMeetingDescription">Description</label>
+              <textarea id="editMeetingDescription" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              Update Meeting
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Edit Progress Modal -->
+      <div id="editProgressModal" class="modal">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <h2>Edit Reading Progress</h2>
+          <form id="editProgressForm">
+            <input type="hidden" id="editProgressId" />
+            <div class="form-group">
+              <label for="editBookTitle">Book Title</label>
+              <input type="text" id="editBookTitle" required />
+            </div>
+            <div class="form-group">
+              <label for="editBookAuthor">Author</label>
+              <input type="text" id="editBookAuthor" required />
+            </div>
+            <div class="form-group">
+              <label for="editTotalPages">Total Pages</label>
+              <input type="number" id="editTotalPages" min="1" required />
+            </div>
+            <div class="form-group">
+              <label for="editPagesRead">Pages Read</label>
+              <input type="number" id="editPagesRead" min="0" required />
+            </div>
+            <div class="form-group">
+              <label for="editReadingNotes">Notes</label>
+              <textarea id="editReadingNotes" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              Update Progress
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Admin Section -->
+      <section id="admin" class="section">
+        <div class="admin-panel-container">
+          <div class="admin-hero">
+            <div class="admin-hero-content">
+              <div class="admin-icon-wrapper">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <h1>Administration Panel</h1>
+              <p class="admin-subtitle">
+                Comprehensive system management and oversight
+              </p>
+              <div class="admin-status-indicator">
+                <span class="status-dot"></span>
+                <span class="status-text" id="adminStatus">System Ready</span>
+              </div>
+            </div>
+
+            <div class="admin-actions">
+              <button class="admin-access-btn" onclick="redirectToAdminPanel()">
+                <i class="fas fa-external-link-alt"></i>
+                <span>Access Admin Panel</span>
+              </button>
+              <p class="admin-note">
+                Redirects to the full administrative dashboard
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <!-- Hidden file input for profile picture -->
+    <input
+      type="file"
+      id="profilePictureInput"
+      accept="image/*"
+      style="display: none"
+    />
+
+    <!-- Scroll to top button -->
+    <button id="scrollToTopBtn" class="scroll-to-top-btn" title="Scroll to top">
+      <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <script src="script.js"></script>
+  </body>
+</html>

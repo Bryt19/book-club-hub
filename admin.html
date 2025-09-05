@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Club Admin Panel</title>
+    <link rel="stylesheet" href="admin-styles.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Admin Header -->
+    <header class="admin-header">
+      <div class="header-container">
+        <div class="header-logo">
+          <i class="fas fa-shield-alt"></i>
+          <span>Book Club Admin Panel</span>
+        </div>
+        <div class="header-actions">
+          <span class="admin-info" id="adminInfo">Loading...</span>
+          <a href="index.html" class="btn btn-primary">
+            <i class="fas fa-home"></i> Back to Site
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Admin Navigation -->
+    <nav class="admin-nav">
+      <div class="nav-container">
+        <button class="nav-btn active" data-tab="dashboard">
+          <i class="fas fa-tachometer-alt"></i>
+          Dashboard
+        </button>
+        <button class="nav-btn" data-tab="approvals">
+          <i class="fas fa-check-circle"></i>
+          Approvals
+          <span class="badge" id="approvalBadge">0</span>
+        </button>
+        <button class="nav-btn" data-tab="users">
+          <i class="fas fa-users"></i>
+          Users
+        </button>
+        <button class="nav-btn" data-tab="clubs">
+          <i class="fas fa-book"></i>
+          Clubs
+        </button>
+        <button class="nav-btn" data-tab="content">
+          <i class="fas fa-shield-alt"></i>
+          Content Moderation
+        </button>
+        <button class="nav-btn" data-tab="reports">
+          <i class="fas fa-chart-bar"></i>
+          Reports
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Admin Content -->
+    <main class="admin-main">
+      <!-- Dashboard Tab -->
+      <div class="tab-content active" id="dashboard">
+        <div class="dashboard-header">
+          <h1>Admin Dashboard</h1>
+          <p>Welcome to the Book Club administration panel</p>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon users">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+              <h3 id="totalUsers">0</h3>
+              <p>Total Users</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon clubs">
+              <i class="fas fa-book"></i>
+            </div>
+            <div class="stat-content">
+              <h3 id="totalClubs">0</h3>
+              <p>Total Clubs</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon discussions">
+              <i class="fas fa-comments"></i>
+            </div>
+            <div class="stat-content">
+              <h3 id="totalDiscussions">0</h3>
+              <p>Total Discussions</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon meetings">
+              <i class="fas fa-calendar"></i>
+            </div>
+            <div class="stat-content">
+              <h3 id="totalMeetings">0</h3>
+              <p>Total Meetings</p>
+            </div>
+          </div>
+          <div class="stat-card pending">
+            <div class="stat-icon pending">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+              <h3 id="pendingApprovals">0</h3>
+              <p>Pending Approvals</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon activity">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-content">
+              <h3 id="recentActivity">0</h3>
+              <p>Recent Activities</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="dashboard-sections">
+          <div class="section-card">
+            <h3>Recent Activity</h3>
+            <div class="activity-list" id="recentActivityList">
+              <!-- Activity items will be loaded here -->
+            </div>
+          </div>
+
+          <div class="section-card">
+            <h3>Quick Actions</h3>
+            <div class="quick-actions">
+              <button class="action-btn" onclick="showTab('approvals')">
+                <i class="fas fa-check-circle"></i>
+                Review Pending Approvals
+              </button>
+              <button class="action-btn" onclick="showTab('users')">
+                <i class="fas fa-user-cog"></i>
+                Manage Users
+              </button>
+              <button class="action-btn" onclick="showTab('content')">
+                <i class="fas fa-shield-alt"></i>
+                Content Moderation
+              </button>
+              <button class="action-btn" onclick="showTab('reports')">
+                <i class="fas fa-chart-bar"></i>
+                View Reports
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Approvals Tab -->
+      <div class="tab-content" id="approvals">
+        <div class="tab-header">
+          <h2>Club Approvals</h2>
+          <p>Review and manage pending club applications</p>
+          <div style="display: flex; gap: 1rem">
+            <button class="btn btn-primary" onclick="refreshApprovals()">
+              <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+            <button class="btn btn-secondary" onclick="checkData()">
+              <i class="fas fa-search"></i> Check Data
+            </button>
+          </div>
+        </div>
+
+        <div class="approvals-container">
+          <div class="filters">
+            <select id="approvalFilter">
+              <option value="all">All Pending</option>
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+            </select>
+          </div>
+
+          <div class="approvals-list" id="approvalsList">
+            <!-- Pending approvals will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Users Tab -->
+      <div class="tab-content" id="users">
+        <div class="tab-header">
+          <h2>User Management</h2>
+          <p>Manage user accounts and permissions</p>
+        </div>
+
+        <div class="users-container">
+          <div class="filters">
+            <input type="text" id="userSearch" placeholder="Search users..." />
+            <select id="userRoleFilter">
+              <option value="">All Roles</option>
+              <option value="admin">Admins</option>
+              <option value="user">Users</option>
+            </select>
+            <select id="userStatusFilter">
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="suspended">Suspended</option>
+            </select>
+          </div>
+
+          <div class="users-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Joined</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody">
+                <!-- Users will be loaded here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Clubs Tab -->
+      <div class="tab-content" id="clubs">
+        <div class="tab-header">
+          <h2>Club Management</h2>
+          <p>Manage all book clubs on the platform</p>
+        </div>
+
+        <div class="clubs-container">
+          <div class="filters">
+            <input type="text" id="clubSearch" placeholder="Search clubs..." />
+            <select id="clubStatusFilter">
+              <option value="">All Status</option>
+              <option value="approved">Approved</option>
+              <option value="pending">Pending</option>
+              <option value="suspended">Suspended</option>
+            </select>
+            <select id="clubGenreFilter">
+              <option value="">All Genres</option>
+              <option value="Fiction">Fiction</option>
+              <option value="Non-Fiction">Non-Fiction</option>
+              <option value="Mystery">Mystery</option>
+              <option value="Romance">Romance</option>
+              <option value="Science Fiction">Science Fiction</option>
+              <option value="Fantasy">Fantasy</option>
+              <option value="Biography">Biography</option>
+              <option value="History">History</option>
+              <option value="Self-Help">Self-Help</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="clubs-grid" id="clubsGrid">
+            <!-- Clubs will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Moderation Tab -->
+      <div class="tab-content" id="content">
+        <div class="tab-header">
+          <h2>Content Moderation</h2>
+          <p>Review and moderate platform content</p>
+        </div>
+
+        <div class="moderation-container">
+          <div class="moderation-header">
+            <h3>Content Management</h3>
+            <p>
+              Review, approve, or remove user-generated content to maintain
+              platform quality
+            </p>
+          </div>
+
+          <div class="moderation-tabs">
+            <button class="mod-tab-btn active" data-mod-tab="discussions">
+              <i class="fas fa-comments"></i>
+              Discussions
+            </button>
+            <button class="mod-tab-btn" data-mod-tab="meetings">
+              <i class="fas fa-calendar"></i>
+              Meetings
+            </button>
+            <button class="mod-tab-btn" data-mod-tab="progress">
+              <i class="fas fa-book-open"></i>
+              Progress
+            </button>
+          </div>
+
+          <div class="moderation-content">
+            <!-- Discussions Moderation -->
+            <div class="mod-tab-content active" id="modDiscussions">
+              <div class="content-filters">
+                <input
+                  type="text"
+                  id="modDiscussionSearch"
+                  placeholder="Search discussions..."
+                />
+                <select id="modDiscussionClubFilter">
+                  <option value="">All Clubs</option>
+                </select>
+              </div>
+              <div class="content-list" id="modDiscussionsList">
+                <!-- Discussions for moderation -->
+              </div>
+            </div>
+
+            <!-- Meetings Moderation -->
+            <div class="mod-tab-content" id="modMeetings">
+              <div class="content-filters">
+                <input
+                  type="text"
+                  id="modMeetingSearch"
+                  placeholder="Search meetings..."
+                />
+                <select id="modMeetingClubFilter">
+                  <option value="">All Clubs</option>
+                </select>
+                <select id="modMeetingPlatformFilter">
+                  <option value="">All Platforms</option>
+                </select>
+              </div>
+              <div class="content-list" id="modMeetingsList">
+                <!-- Meetings for moderation -->
+              </div>
+            </div>
+
+            <!-- Progress Moderation -->
+            <div class="mod-tab-content" id="modProgress">
+              <div class="content-filters">
+                <input
+                  type="text"
+                  id="modProgressSearch"
+                  placeholder="Search progress..."
+                />
+                <select id="modProgressClubFilter">
+                  <option value="">All Clubs</option>
+                </select>
+                <select id="modProgressAuthorFilter">
+                  <option value="">All Authors</option>
+                </select>
+              </div>
+              <div class="content-list" id="modProgressList">
+                <!-- Progress entries for moderation -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reports Tab -->
+      <div class="tab-content" id="reports">
+        <div class="tab-header">
+          <h2>Reports & Analytics</h2>
+          <p>View platform statistics and reports</p>
+        </div>
+
+        <div class="reports-container">
+          <!-- Quick Stats Overview -->
+          <div class="stats-overview">
+            <div class="stat-card">
+              <div class="stat-icon users">
+                <i class="fas fa-users"></i>
+              </div>
+              <div class="stat-content">
+                <h3 id="totalUsersReport">0</h3>
+                <p>Total Users</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon clubs">
+                <i class="fas fa-book"></i>
+              </div>
+              <div class="stat-content">
+                <h3 id="totalClubsReport">0</h3>
+                <p>Total Clubs</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon discussions">
+                <i class="fas fa-comments"></i>
+              </div>
+              <div class="stat-content">
+                <h3 id="totalDiscussionsReport">0</h3>
+                <p>Total Discussions</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon meetings">
+                <i class="fas fa-calendar"></i>
+              </div>
+              <div class="stat-content">
+                <h3 id="totalMeetingsReport">0</h3>
+                <p>Total Meetings</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Charts Section -->
+          <div class="charts-section">
+            <div class="chart-row">
+              <div class="report-card large">
+                <h3>User Growth & Engagement</h3>
+                <div class="chart-controls">
+                  <select id="userGrowthPeriod">
+                    <option value="6">Last 6 Months</option>
+                    <option value="12" selected>Last 12 Months</option>
+                    <option value="24">Last 2 Years</option>
+                  </select>
+                </div>
+                <div class="report-chart" id="userGrowthChart">
+                  <!-- Chart will be rendered here -->
+                </div>
+              </div>
+            </div>
+
+            <div class="chart-row">
+              <div class="report-card">
+                <h3>Club Activity & Performance</h3>
+                <div class="chart-controls">
+                  <select id="clubActivityPeriod">
+                    <option value="6">Last 6 Months</option>
+                    <option value="12" selected>Last 12 Months</option>
+                    <option value="24">Last 2 Years</option>
+                  </select>
+                </div>
+                <div class="report-chart" id="clubActivityChart">
+                  <!-- Chart will be rendered here -->
+                </div>
+              </div>
+              <div class="report-card">
+                <h3>Content Generation Trends</h3>
+                <div class="chart-controls">
+                  <select id="contentTrendsPeriod">
+                    <option value="6">Last 6 Months</option>
+                    <option value="12" selected>Last 12 Months</option>
+                    <option value="24">Last 2 Years</option>
+                  </select>
+                </div>
+                <div class="report-chart" id="contentTrendsChart">
+                  <!-- Chart will be rendered here -->
+                </div>
+              </div>
+            </div>
+
+            <div class="chart-row">
+              <div class="report-card">
+                <h3>Genre Distribution</h3>
+                <div class="report-chart" id="genreDistributionChart">
+                  <!-- Chart will be rendered here -->
+                </div>
+              </div>
+              <div class="report-card">
+                <h3>User Activity Heatmap</h3>
+                <div class="report-chart" id="userActivityHeatmap">
+                  <!-- Chart will be rendered here -->
+                </div>
+              </div>
+            </div>
+
+            <div class="chart-row">
+              <div class="report-card large">
+                <h3>Platform Performance Metrics</h3>
+                <div class="metrics-grid">
+                  <div class="metric-item">
+                    <div class="metric-value" id="avgClubSize">0</div>
+                    <div class="metric-label">Avg Club Size</div>
+                  </div>
+                  <div class="metric-item">
+                    <div class="metric-value" id="avgDiscussionsPerClub">0</div>
+                    <div class="metric-label">Avg Discussions/Club</div>
+                  </div>
+                  <div class="metric-item">
+                    <div class="metric-value" id="avgMeetingsPerClub">0</div>
+                    <div class="metric-label">Avg Meetings/Club</div>
+                  </div>
+                  <div class="metric-item">
+                    <div class="metric-value" id="userRetentionRate">0%</div>
+                    <div class="metric-label">User Retention Rate</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detailed Analytics Section -->
+          <div class="analytics-section">
+            <div class="analytics-header">
+              <h3>Detailed Analytics</h3>
+              <div class="date-range-picker">
+                <label>Date Range:</label>
+                <input type="date" id="analyticsStartDate" />
+                <span>to</span>
+                <input type="date" id="analyticsEndDate" />
+                <button class="btn btn-primary" onclick="updateAnalytics()">
+                  <i class="fas fa-sync"></i> Update
+                </button>
+              </div>
+            </div>
+
+            <div class="analytics-grid">
+              <div class="analytics-card">
+                <h4>Top Performing Clubs</h4>
+                <div class="top-clubs-list" id="topClubsList">
+                  <!-- Top clubs will be populated here -->
+                </div>
+              </div>
+              <div class="analytics-card">
+                <h4>Most Active Users</h4>
+                <div class="top-users-list" id="topUsersList">
+                  <!-- Top users will be populated here -->
+                </div>
+              </div>
+              <div class="analytics-card">
+                <h4>Content Quality Metrics</h4>
+                <div class="quality-metrics" id="qualityMetrics">
+                  <!-- Quality metrics will be populated here -->
+                </div>
+              </div>
+              <div class="analytics-card">
+                <h4>Platform Growth Insights</h4>
+                <div class="growth-insights" id="growthInsights">
+                  <!-- Growth insights will be populated here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Admin Login</h2>
+          <p>Enter your admin credentials to access the panel</p>
+        </div>
+        <form id="adminLoginForm">
+          <div class="form-group">
+            <label for="adminEmail">Email</label>
+            <input type="email" id="adminEmail" required />
+          </div>
+          <div class="form-group">
+            <label for="adminPassword">Password</label>
+            <div class="password-input">
+              <input type="password" id="adminPassword" required />
+              <button
+                type="button"
+                class="password-toggle"
+                onclick="togglePassword('adminPassword')"
+              >
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-sign-in-alt"></i> Login
+          </button>
+        </form>
+        <div class="modal-footer">
+          <a href="index.html">Back to Main Site</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <script src="admin.js"></script>
+  </body>
+</html>

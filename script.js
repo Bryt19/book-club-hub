@@ -4574,8 +4574,9 @@ function validateConfirmPassword(passwordInput, confirmPasswordInput) {
   removePasswordValidationMessages();
   confirmPasswordInput.style.borderColor = "";
 
-  if (confirmPassword.length === 0) {
-    return; // Don't show validation for empty field
+  // Don't show validation if either field is empty
+  if (confirmPassword.length === 0 || password.length === 0) {
+    return; // Don't show validation for empty fields
   }
 
   if (password === confirmPassword) {
